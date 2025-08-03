@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hamiltonian Harmonic Oscillator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" xintegrity="sha384-n8MVd4RsNIU0KOVEMVIqhKyqtjaHUAxbZBZMDon9/VIptE4LibBTgKPflG/If2Au" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" xintegrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" xintegrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+        onload="renderMathInElement(document.body);"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* bg-gray-900 */
+            color: #f3f4f6; /* text-gray-200 */
+        }
+        .katex { font-size: 1.2em; }
+        .slider-label {
+            min-width: 120px;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-4xl mx-auto bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8">
+        <h1 class="text-3xl font-bold text-center text-cyan-400 mb-2">Hamiltonian Harmonic Oscillator</h1>
+        <p class="text-center text-gray-400 mb-6">A real-time simulation of a classical harmonic oscillator using Hamiltonian mechanics.</p>
+
+        <!-- Canvas for Simulation -->
+        <div class="bg-gray-900 rounded-lg p-4 mb-6 ring-1 ring-gray-700">
+            <canvas id="simulationCanvas" class="w-full h-48"></canvas>
+        </div>
+
+        <!-- Controls -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-gray-700 p-4 rounded-lg">
+                <label for="massSlider" class="flex items-center space-x-3 text-lg font-medium">
+                    <span class="slider-label">Mass (m)</span>
+                    <span id="massValue" class="font-mono text-cyan-400">1.0</span>
+                </label>
+                <input id="massSlider" type="range" min="0.1" max="5" value="1" step="0.1" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+            </div>
+            <div class="bg-gray-700 p-4 rounded-lg">
+                <label for="springSlider" class="flex items-center space-x-3 text-lg font-medium">
+                    <span class="slider-label">Spring (k)</span>
+                    <span id="springValue" class="font-mono text-cyan-400">10.0</span>
+                </label>
+                <input id="springSlider" type="range" min="1" max="50" value="10" step="1" class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer">
+            </div>
+            <div class="flex items-center justify-center">
+                <button id="resetButton" class="w-full bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-300">
+                    Reset Simulation
+                </button>
+            </div>
+        </div>
+
+        <!-- Equations and Real-time Values -->
+        <div class="bg-gray-900 rounded-lg p-6 ring-1 ring-gray-700">
+            <h2 class="text-2xl font-bold text-cyan-400 mb-4">Governing Equations & Values</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <!-- Hamiltonian -->
+                <div class="flex items-center justify-between bg-gray-800 p-4 rounded-lg">
+                    <div class="text-gray-300">$$ H = \frac{p^2}{2m} + \frac{1}{2}kq^2 $$</div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-400">Total Energy (H)</div>
+                        <div id="hamiltonianValue" class="text-2xl font-mono text-amber-400">0.00</div>
+                    </div>
+                </div>
+                <!-- Position -->
+                <div class="flex items-center justify-between bg-gray-800 p-4 rounded-lg">
+                    <div class="text-gray-300">$$ \dot{q} = \frac{\partial H}{\partial p} = \frac{p}{m} $$</div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-400">Position (q)</div>
+                        <div id="positionValue" class="text-2xl font-mono text-green-400">0.00</div>
+                    </div>
+                </div>
+                <!-- Momentum -->
+                <div class="flex items-center justify-between bg-gray-800 p-4 rounded-lg">
+                    <div class="text-gray-300">$$ \dot{p} = -\frac{\partial H}{\partial q} = -kq $$</div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-400">Momentum (p)</div>
+                        <div id="momentumValue" class="text-2xl font-mono text-violet-400">0.00</div>
+                    </div>
+                </div>
+                <!-- Time -->
+                 <div class="flex items-center justify-between bg-gray-800 p-4 rounded-lg">
+                    <div class="text-gray-300">$$ \text{Time Elapsed} $$</div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-400">Time (t)</div>
+                        <div id="timeValue" class="text-2xl font-mono text-gray-300">0.00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Element References ---
+            const canvas = document.getElementById('simulationCanvas');
+            const ctx = canvas.getContext('2d');
+
+            const massSlider = document.getElementById('massSlider');
+            const springSlider = document.getElementById('springSlider');
+            const resetButton = document.getElementById('resetButton');
+
+            const massValueEl = document.getElementById('massValue');
+            const springValueEl = document.getElementById('springValue');
+            const positionValueEl = document.getElementById('positionValue');
+            const momentumValueEl = document.getElementById('momentumValue');
+            const hamiltonianValueEl = document.getElementById('hamiltonianValue');
+            const timeValueEl = document.getElementById('timeValue');
+
+            // --- Simulation State ---
+            let state = {
+                q: 1.0,  // position (initial amplitude)
+                p: 0.0,  // momentum
+                m: 1.0,  // mass
+                k: 10.0, // spring constant
+                t: 0.0,  // time
+                initialQ: 1.0, // Store initial position for energy calculation
+            };
+
+            let animationFrameId;
+
+            // --- Utility Functions ---
+            const resizeCanvas = () => {
+                const dpr = window.devicePixelRatio || 1;
+                const rect = canvas.getBoundingClientRect();
+                canvas.width = rect.width * dpr;
+                canvas.height = rect.height * dpr;
+                ctx.scale(dpr, dpr);
+            };
+
+            // --- Simulation Logic ---
+            const resetSimulation = () => {
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                }
+                // Stop the animation before changing state
+                lastTime = 0; 
+
+                state.m = parseFloat(massSlider.value);
+                state.k = parseFloat(springSlider.value);
+                state.q = state.initialQ;
+                state.p = 0.0;
+                state.t = 0.0;
+
+                massValueEl.textContent = state.m.toFixed(1);
+                springValueEl.textContent = state.k.toFixed(1);
+
+                // Re-render KaTeX if needed, though onload should handle it initially.
+                if (typeof renderMathInElement === 'function') {
+                    renderMathInElement(document.body);
+                }
+                
+                // Restart the animation
+                animationFrameId = requestAnimationFrame(animate);
+            };
+
+            const update = (dt) => {
+                // This uses the simple Euler-Cromer method for integration, which is more
+                // stable for oscillators than the standard Euler method.
+                const p_dot = -state.k * state.q;
+                state.p += p_dot * dt;
+                
+                const q_dot = state.p / state.m;
+                state.q += q_dot * dt;
+                
+                state.t += dt;
+            };
+
+            // --- Drawing Logic ---
+            const draw = () => {
+                const width = canvas.clientWidth;
+                const height = canvas.clientHeight;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                const equilibriumX = width / 2;
+                const wallX = width * 0.1;
+                const massSize = 20 + Math.sqrt(state.m) * 5; // Mass size depends on m
+                const scale = (width * 0.35); // Scale factor for position q
+
+                // Current position of the mass
+                const massX = equilibriumX + state.q * scale;
+
+                // Draw the spring
+                ctx.beginPath();
+                ctx.moveTo(wallX, height / 2);
+                const springSegments = 20;
+                const springWidth = massX - wallX;
+                for (let i = 1; i < springSegments; i++) {
+                    const x = wallX + (i / springSegments) * springWidth;
+                    const y = height / 2 + (i % 2 === 0 ? -10 : 10);
+                    ctx.lineTo(x, y);
+                }
+                ctx.lineTo(massX, height / 2);
+                ctx.strokeStyle = '#60a5fa'; // blue-400
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Draw the mass
+                ctx.beginPath();
+                ctx.rect(massX - massSize / 2, height / 2 - massSize / 2, massSize, massSize);
+                ctx.fillStyle = '#2dd4bf'; // teal-400
+                ctx.fill();
+                ctx.strokeStyle = '#99f6e4'; // teal-200
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Draw the equilibrium line
+                ctx.beginPath();
+                ctx.moveTo(equilibriumX, height / 2 - 30);
+                ctx.lineTo(equilibriumX, height / 2 + 30);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.setLineDash([5, 5]);
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                ctx.setLineDash([]);
+            };
+
+            const updateUI = () => {
+                // Calculate total energy (Hamiltonian)
+                const kineticEnergy = (state.p * state.p) / (2 * state.m);
+                const potentialEnergy = 0.5 * state.k * (state.q * state.q);
+                const totalEnergy = kineticEnergy + potentialEnergy;
+
+                positionValueEl.textContent = state.q.toFixed(2);
+                momentumValueEl.textContent = state.p.toFixed(2);
+                hamiltonianValueEl.textContent = totalEnergy.toFixed(2);
+                timeValueEl.textContent = state.t.toFixed(2);
+            };
+
+            // --- Main Animation Loop ---
+            let lastTime = 0;
+            const animate = (timestamp) => {
+                if (!lastTime) {
+                    lastTime = timestamp;
+                }
+                // Ensure dt is not excessively large on the first frame after a pause
+                let dt = (timestamp - lastTime) / 1000; // time delta in seconds
+                if (dt > 0.1) dt = 0.016; // Cap dt to avoid instability
+                lastTime = timestamp;
+
+                // Run multiple physics updates per frame for stability if dt is large
+                const substeps = 5;
+                const sub_dt = dt / substeps;
+                for (let i = 0; i < substeps; i++) {
+                    update(sub_dt);
+                }
+
+                draw();
+                updateUI();
+
+                animationFrameId = requestAnimationFrame(animate);
+            };
+
+            // --- Event Listeners ---
+            massSlider.addEventListener('input', (e) => {
+                massValueEl.textContent = parseFloat(e.target.value).toFixed(1);
+            });
+            springSlider.addEventListener('input', (e) => {
+                springValueEl.textContent = parseFloat(e.target.value).toFixed(1);
+            });
+            
+            // Reset when sliders are changed
+            massSlider.addEventListener('change', resetSimulation);
+            springSlider.addEventListener('change', resetSimulation);
+            resetButton.addEventListener('click', resetSimulation);
+
+            window.addEventListener('resize', () => {
+                resizeCanvas();
+                draw(); // Redraw on resize
+            });
+
+            // --- Initial Setup ---
+            resizeCanvas();
+            resetSimulation();
+        });
+    </script>
+</body>
+</html>
